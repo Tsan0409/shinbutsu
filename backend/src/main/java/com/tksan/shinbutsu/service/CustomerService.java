@@ -1,6 +1,7 @@
 package com.tksan.shinbutsu.service;
 
 import com.tksan.shinbutsu.dto.CustomerRequest;
+import com.tksan.shinbutsu.dto.CustomerUpdateRequest;
 import com.tksan.shinbutsu.entity.Customer;
 import com.tksan.shinbutsu.mapper.CustomerMapper;
 import org.springframework.stereotype.Service;
@@ -51,6 +52,26 @@ public class CustomerService {
 
     @Transactional
     public Customer updateCustomer(String id, CustomerRequest request) {
+        // 存在チェック
+        Customer existing = customerMapper.findById(id);
+        if (existing == null) {
+            throw new RuntimeException("Customer not found: " + id);
+        }
+
+        Customer customer = new Customer(
+            id,
+            request.getUsername(),
+            request.getEmail(),
+            request.getPhoneNumber(),
+            request.getPostCode()
+        );
+
+        customerMapper.update(customer);
+        return customer;
+    }
+
+    @Transactional
+    public Customer updateCustomer(String id, CustomerUpdateRequest request) {
         // 存在チェック
         Customer existing = customerMapper.findById(id);
         if (existing == null) {

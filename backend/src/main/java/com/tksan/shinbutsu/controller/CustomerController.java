@@ -1,6 +1,7 @@
 package com.tksan.shinbutsu.controller;
 
 import com.tksan.shinbutsu.dto.CustomerRequest;
+import com.tksan.shinbutsu.dto.CustomerUpdateRequest;
 import com.tksan.shinbutsu.dto.CustomerResponse;
 import com.tksan.shinbutsu.entity.Customer;
 import com.tksan.shinbutsu.service.CustomerService;
@@ -62,7 +63,7 @@ public class CustomerController {
     @PutMapping("/{id}")
     public ResponseEntity<CustomerResponse> updateCustomer(
             @PathVariable String id,
-            @Valid @RequestBody CustomerRequest request) {
+            @Valid @RequestBody CustomerUpdateRequest request) {
         Customer customer = customerService.updateCustomer(id, request);
         return ResponseEntity.ok(new CustomerResponse(customer));
     }

@@ -21,7 +21,7 @@ public class CustomerRequest {
     private String email;
 
     @NotBlank(message = "電話番号は必須です")
-    @Pattern(regexp = "^[0-9]{11}$", message = "電話番号は11桁の数字で入力してください")
+    @Pattern(regexp = "^[0-9]{10,11}$", message = "電話番号は10桁または11桁の数字で入力してください")
     private String phoneNumber;
 
     @NotBlank(message = "郵便番号は必須です")

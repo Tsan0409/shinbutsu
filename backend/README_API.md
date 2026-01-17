@@ -71,7 +71,7 @@ curl -X DELETE http://localhost:8080/api/customers/011
 - **id**: 必須、10文字以内
 - **username**: 必須、50文字以内
 - **email**: 必須、メールアドレス形式、50文字以内
-- **phoneNumber**: 必須、11桁の数字
+- **phoneNumber**: 必須、10桁または11桁の数字
 - **postCode**: 必須、7桁の数字
 
 ## エラーレスポンス例
