@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: shinbutsu
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5431/app_db
+    username: appuser
+    password: appuser
+# MyBatis
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true

@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    restart: always
+    environment:
+      TZ: "Asia/Tokyo"
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: appuser
+      POSTGRES_DB: app_db
+    ports:
+      - 5431:5432
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d
+
+volumes:
+  postgres:
