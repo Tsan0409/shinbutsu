@@ -109,10 +109,35 @@ curl -X DELETE http://localhost:8080/api/customers/011
 }
 ```
 
+## データベース
+
+本プロジェクトでは、次の2種類のテーブルセットを提供しています:
+
+### 1. デモ用Customer テーブル
+
+APIの動作確認用のシンプルなCRUDテーブルです。
+
+- **ファイル**: `postgres/initdb/00_DEMO_CUSTOMER.sql`
+- **テーブル**: customer
+- **用途**: APIの疎通確認、CRUD操作のデモ
+
+### 2. 神社仏閣アプリ用テーブル (MVP)
+
+本番アプリケーション用の7テーブルからなるスキーマです。
+
+- **ファイル**: `postgres/initdb/01_DDL_CREATE_TABLE.sql`, `02_DML_INSERT_INIT_DATA.sql`
+- **テーブル**: period, era, sect, temple, temple_article, glossary_term, article_term
+- **サンプルデータ**: 62レコード (清水寺、金閣寺、東大寺など)
+
+詳細は以下のドキュメントを参照してください:
+
+- [データベース設計書](./docs/database_design.md) - テーブル定義、ER図、制約、インデックス
+- [データベースセットアップガイド](./docs/database_setup.md) - 初期化手順、接続情報、トラブルシューティング
+
 ## 技術スタック
 
 - Spring Boot 4.0.1
 - Java 21
 - MyBatis 4.0.1
-- PostgreSQL 18
+- PostgreSQL 16
 - Docker Compose

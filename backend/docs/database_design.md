@@ -1,9 +1,9 @@
 # 神仏アプリケーション データベース設計書
 
-## 概要
+## 📋 概要
 本ドキュメントは、お寺めぐり・御朱印集めが趣味のライトユーザー向け神仏アプリケーションのMVP版データベース設計を記載します。
 
-## テーブル一覧
+## 🗂️ テーブル一覧
 
 | No | テーブル名 | 論理名 | 説明 |
 |----|-----------|--------|------|
@@ -15,7 +15,7 @@
 | 6 | glossary_term | 用語集 | 仏教用語・歴史用語 |
 | 7 | article_term | 記事-用語関連 | 記事と用語の多対多関連 |
 
-## ER図（概念）
+## 🔗 ER図（概念）
 
 ```
 period (時代) ──┐
@@ -35,7 +35,34 @@ temple (寺院) ──┬── temple_article (記事)
 
 ---
 
-## 1. period（時代マスタ）
+## 🎯 設計方針
+
+### バリデーション責務分担（ハイブリッドアプローチ）
+
+#### 🗄️ DB層の責務
+- **NOT NULL制約**: 必須項目の強制
+- **UNIQUE制約**: 一意性の保証
+- **PRIMARY KEY**: 主キーの保証
+- **FOREIGN KEY**: 参照整合性の保証
+- **CHECK制約（最小限）**: 
+  - 論理的矛盾の防止（例: end_year >= start_year）
+  - 固定値の列挙（例: IN ('value1', 'value2')）
+  - 複数列の整合性保証
+
+#### 💻 アプリケーション層の責務
+- 詳細なバリデーション（文字列長、範囲、形式）
+- ビジネスルール
+- 親切なエラーメッセージ
+- タイムスタンプ管理（@CreatedDate, @LastModifiedDate）
+
+### タイムスタンプ管理
+- ❌ DBトリガーは使用しない（複雑化、デバッグ困難）
+- ✅ Spring Bootの`@CreatedDate`/`@LastModifiedDate`を使用
+- ✅ アプリケーション層で明示的に管理
+
+---
+
+## 📊 1. period（時代マスタ）
 
 ### 概要
 日本の歴史的時代区分を管理するマスタテーブル（例: 平安時代、鎌倉時代、江戸時代）。
@@ -298,30 +325,7 @@ temple (寺院) ──┬── temple_article (記事)
 
 ---
 
-## トリガー
-
-### updated_at自動更新
-以下のテーブルは`UPDATE`時に`updated_at`カラムを自動更新します。
-
-- `sect`
-- `temple`
-- `temple_article`
-- `glossary_term`
-
-実装:
-```sql
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = CURRENT_TIMESTAMP;
-    RETURN NEW;
-END;
-$$ language 'plpgsql';
-```
-
----
-
-## インデックス戦略
+## 📈 インデックス戦略
 
 ### 検索用インデックス
 - **都道府県絞り込み**: `idx_temple_prefecture`
@@ -347,7 +351,7 @@ $$ language 'plpgsql';
 
 ---
 
-## データ整合性
+## 🔒 データ整合性
 
 ### 外部キー制約
 - `era.period_id` → `period.id`（時代参照）
@@ -357,8 +361,26 @@ $$ language 'plpgsql';
 - `article_term.article_id` → `temple_article.id` ON DELETE CASCADE
 - `article_term.term_id` → `glossary_term.id` ON DELETE CASCADE
 
-### CHECK制約
-- `temple.head_temple_rank`: 'sohonzan' または 'daihonzan' のみ
+### CHECK制約（最小限）
+
+#### 論理的整合性
+```sql
+-- 時代・元号: 終了年 >= 開始年
+CONSTRAINT period_year_order CHECK (end_year IS NULL OR end_year >= start_year)
+CONSTRAINT era_year_order CHECK (end_year IS NULL OR end_year >= start_year)
+
+-- 寺院: 総本山フラグとランクの整合性
+CONSTRAINT temple_head_temple_rank_valid CHECK (
+    (is_head_temple = false AND head_temple_rank IS NULL) OR
+    (is_head_temple = true AND head_temple_rank IS NOT NULL)
+)
+```
+
+#### 固定値の列挙
+```sql
+-- 総本山ランク
+head_temple_rank CHECK (head_temple_rank IN ('sohonzan', 'daihonzan'))
+```
 
 ### UNIQUE制約
 - `period.name`: 時代名は一意
@@ -380,9 +402,10 @@ $$ language 'plpgsql';
 
 ---
 
-## 変更履歴
+## 📝 変更履歴
 
 | 日付 | バージョン | 変更内容 |
 |------|-----------|---------|
-| 2026-01-20 | 1.0 | 初版作成（MVP版6テーブル） |
+| 2026-01-22 | 1.1 | トリガーを削除（updated_at管理をアプリ層に移行）<br>CHECK制約を最小限に簡略化<br>タイムゾーンをAsia/Tokyoに設定 |
+| 2026-01-20 | 1.0 | 初版作成（MVP版7テーブル）<br>時代と元号を別テーブルに分離 |
 | 2026-01-20 | 1.1 | 時代と元号のテーブルを分離（period/eraに分割、合計7テーブル） |
