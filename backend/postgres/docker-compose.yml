@@ -6,6 +6,7 @@ services:
     restart: always
     environment:
       TZ: "Asia/Tokyo"
+      PGTZ: "Asia/Tokyo"
       POSTGRES_USER: appuser
       POSTGRES_PASSWORD: appuser
       POSTGRES_DB: app_db
